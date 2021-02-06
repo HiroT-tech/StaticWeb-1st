@@ -1,0 +1,130 @@
+<!DOCUTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Audio Playback</title>
+  <style>
+    audio {
+      display: none
+    }
+    html {
+      font-size: 32px;
+    }
+    .player_psud {
+      display: inline-block;
+      width: 120px;
+      height: 120px;
+      margin: 1em;
+      border-radius: 50%;
+      background: #ddd;
+      text-align: center;
+      line-height: 120px;
+      cursor: pointer;
+    }
+    .player_time {
+      margin: 0 1em;
+    }
+    .player_current_duration {
+      padding: 0;
+      margin: .2em;
+    }
+    .seekbar {
+      width: 640px;
+      height: 40px;
+      border-radius: 20px;
+      background: linear-gradient(#ccc, #ccc) no-repeat #eee;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <audio src="https://www.music-note.jp/bgm/mp3/2016/0826/desperate.mp3"></audio>
+    <div class="player_psud" id="play">Play</div>
+    <div class="player_psud" id="stop">Stop</div>
+    <div class="player_psud" id="Vup">▲</div>
+    <div class="player_psud" id="Vdown">▼</div>
+    <div class="player_time" id="time">
+      <span id="current">00:00</span>
+      <span id="duration">00:00</span>
+    </div>
+    <div class="seekbar" id="seekbar"></div>
+  </div>
+  <script>
+    const audio = document.getElementsByTagName("audio")[0]
+    const playButton = document.getElementById("play")
+    const stopButton = document.getElementById("stop")
+    const VupButton = document.getElementById("Vup")
+    const VdownButton = document.getElementById("Vdown")
+    const defaultStartTime = 3
+    playButton.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play()
+        play.innerHTML = play.innerHTML === 'Play' ? 'Pause' : 'Play'
+      } else {
+        audio.pause()
+        play.innerHTML = 'Play'
+      }
+    })
+    stopButton.addEventListener('click', () => {
+      audio.pause()
+      audio.currentTime = defaultStartTime
+    })
+    VupButton.addEventListener('click', () => {
+      audio.volume = audio.volume + 0.1
+    })
+    VdownButton.addEventListener('click', () => {
+      audio.volume = audio.volume - 0.1
+    })
+    
+    document.addEventListener('DOMContentLoaded', (e) => {
+        audio.currentTime = defaultStartTime
+    })
+    document.addEventListener('deviceready', (e) => {
+        audio.currentTime = defaultStartTime
+    })
+    
+    audio.addEventListener("timeupdate", (e) => {
+      const current = Math.floor(audio.currentTime)
+      const duration = Math.round(audio.duration)
+      if(!isNaN(duration)){
+        document.getElementById('current').innerHTML = playTime(current)
+        document.getElementById('duration').innerHTML = playTime(duration)
+        const percent = Math.round((audio.currentTime/audio.duration)*1000)/10
+        document.getElementById('seekbar').style.backgroundSize = percent + '%'
+      }
+    })
+
+    document.getElementById('seekbar').addEventListener("click", (e) => {
+      const duration = Math.round(audio.duration)
+      if(!isNaN(duration)){
+        const mouse = e.pageX
+        const element = document.getElementById('seekbar')
+        const rect = element.getBoundingClientRect()
+        const position = rect.left + window.pageXOffset
+        const offset = mouse - position
+        const width = rect.right - rect.left
+        audio.currentTime = Math.round(duration * (offset / width))
+      }
+    })
+
+    function playTime (t) {
+      let hms = ''
+      const h = t / 3600 | 0
+      const m = t % 3600 / 60 | 0
+      const s = t % 60
+      const z2 = (v) => {
+        const s = '00' + v
+        return s.substr(s.length - 2, 2)
+      }
+      if(h != 0){
+        hms = h + ':' + z2(m) + ':' + z2(s)
+      }else if(m != 0){
+        hms = z2(m) + ':' + z2(s)
+      }else{
+        hms = '00:' + z2(s)
+      }
+      return hms
+    }
+  </script>
+</body>
+</html>
